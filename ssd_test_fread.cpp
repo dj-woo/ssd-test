@@ -6,12 +6,10 @@
 #include <cstdio>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <sys/mman.h>
-#include <fcntl.h>
 #include <random>
 #include <pthread.h>
 #include <iomanip>
-#include <cstring>
+#include <fcntl.h>
 
 using namespace std;
 
@@ -20,7 +18,7 @@ struct ThreadStats {
     atomic<long long> total_bytes{0};
 };
 
-void worker(int id, char* mapped_data, size_t file_size, int duration_sec, int num_cores, double page_fault_ratio, ThreadStats& stats, atomic<bool>& stop) {
+void worker(int id, string target_file, size_t file_size, int duration_sec, int num_cores, double page_fault_ratio, ThreadStats& stats, atomic<bool>& stop) {
     // Set thread affinity
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
@@ -30,8 +28,16 @@ void worker(int id, char* mapped_data, size_t file_size, int duration_sec, int n
         cerr << "Error setting affinity for thread " << id << endl;
     }
 
+    // "don't use O_RDONLY" -> use "r+" which is O_RDWR
+    FILE* fp = fopen(target_file.c_str(), "r+");
+    if (!fp) {
+        perror("fopen");
+        return;
+    }
+    int fd = fileno(fp);
+
     const size_t block_size = 4096;
-    char buffer[block_size];
+    char* buffer = new char[block_size];
     
     mt19937_64 rng(1337 + id);
     uniform_int_distribution<size_t> dist(0, (file_size - block_size) / block_size);
@@ -40,20 +46,31 @@ void worker(int id, char* mapped_data, size_t file_size, int duration_sec, int n
     while (!stop.load()) {
         size_t offset = dist(rng) * block_size;
         
-        // If page_fault_ratio > 0, randomly decide whether to force a page fault
+        // If page_fault_ratio > 0, randomly decide whether to force the kernel to drop the page from cache
         if (page_fault_ratio > 0.0 && fault_dist(rng) < page_fault_ratio) {
-            // MADV_DONTNEED tells the kernel to discard the pages.
-            // Subsequent access will trigger a page fault.
-            madvise(mapped_data + offset, block_size, MADV_DONTNEED);
+            // POSIX_FADV_DONTNEED tells the kernel to discard the data from the page cache.
+            // Subsequent access will trigger a disk read (analogous to a page fault).
+            posix_fadvise(fd, offset, block_size, POSIX_FADV_DONTNEED);
+        }
+
+        // Standard I/O buffer use
+        if (fseeko(fp, offset, SEEK_SET) != 0) {
+            perror("fseeko");
+            break;
         }
         
-        // Simulate a read by copying from mapped memory
-        // This triggers page faults if the data isn't in memory
-        memcpy(buffer, mapped_data + offset, block_size);
-        
-        stats.total_reads++;
-        stats.total_bytes += block_size;
+        size_t bytes_read = fread(buffer, 1, block_size, fp);
+        if (bytes_read > 0) {
+            stats.total_reads++;
+            stats.total_bytes += bytes_read;
+        } else if (ferror(fp)) {
+            perror("fread");
+            break;
+        }
     }
+
+    delete[] buffer;
+    fclose(fp);
 }
 
 int main(int argc, char* argv[]) {
@@ -73,31 +90,17 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int fd = open(target_file.c_str(), O_RDONLY);
-    if (fd < 0) {
-        perror("open");
-        return 1;
-    }
-
     struct stat st;
-    if (fstat(fd, &st) < 0) {
-        perror("fstat");
-        close(fd);
+    if (stat(target_file.c_str(), &st) < 0) {
+        perror("stat");
         return 1;
     }
     size_t file_size = st.st_size;
 
-    char* mapped_data = (char*)mmap(NULL, file_size, PROT_READ, MAP_SHARED, fd, 0);
-    if (mapped_data == MAP_FAILED) {
-        perror("mmap");
-        close(fd);
-        return 1;
-    }
-
-    cout << "Starting test (mmap) on " << target_file << " (" << file_size / (1024 * 1024) << " MB)" << endl;
+    cout << "Starting test on " << target_file << " (" << file_size / (1024 * 1024) << " MB)" << endl;
     cout << "Threads: " << num_threads << ", Cores: " << num_cores << ", Duration: " << duration_sec << "s" << endl;
-    cout << "Page Fault Ratio: " << fixed << setprecision(2) << page_fault_ratio << endl;
-    cout << "Mode: mmap (memcpy from mapped memory)" << endl;
+    cout << "Page Fault Ratio (posix_fadvise): " << fixed << setprecision(2) << page_fault_ratio << endl;
+    cout << "Mode: Standard I/O (fread), Mode: r+ (O_RDWR), No Optimization" << endl;
 
     ThreadStats stats;
     atomic<bool> stop{false};
@@ -107,7 +110,7 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < num_threads; ++i) {
         threads.emplace_back([=, &stats, &stop]() {
-            worker(i, mapped_data, file_size, duration_sec, num_cores, page_fault_ratio, stats, stop);
+            worker(i, target_file, file_size, duration_sec, num_cores, page_fault_ratio, stats, stop);
         });
     }
 
@@ -130,9 +133,6 @@ int main(int argc, char* argv[]) {
     cout << "IOPS: " << iops << endl;
     cout << "Throughput: " << throughput << " MB/s" << endl;
     cout << "Actual Duration: " << diff.count() << "s" << endl;
-
-    munmap(mapped_data, file_size);
-    close(fd);
 
     return 0;
 }

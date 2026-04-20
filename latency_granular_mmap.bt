@@ -1,0 +1,82 @@
+// 1. User Space Start
+uprobe:./ssd_test_mmap:_Z6workeriPcmiidR11ThreadStatsRSt6atomicIbE
+{
+    @start_user[tid] = nsecs;
+}
+
+// 2. Kernel Entry (Page Fault)
+kprobe:handle_mm_fault
+{
+    if (@start_user[tid]) {
+        $lat = nsecs - @start_user[tid];
+        @latency_1_user_space_ns = hist($lat);
+        @avg_1_user_space_ns = avg($lat);
+        delete(@start_user[tid]);
+    }
+    @start_fault[tid] = nsecs;
+}
+
+// 3. File System Layer (Filemap Fault)
+kprobe:filemap_fault
+{
+    if (@start_fault[tid]) {
+        $lat = nsecs - @start_fault[tid];
+        @latency_2_kernel_entry_ns = hist($lat);
+        @avg_2_kernel_entry_ns = avg($lat);
+        delete(@start_fault[tid]);
+    }
+    @start_fs[tid] = nsecs;
+}
+
+// 4. Block Layer Start (FS hands off to Block Layer)
+kprobe:blk_mq_submit_bio
+{
+    if (@start_fs[tid]) {
+        $lat = nsecs - @start_fs[tid];
+        @latency_3_filesystem_ns = hist($lat);
+        @avg_3_filesystem_ns = avg($lat);
+        delete(@start_fs[tid]);
+    }
+    @start_block[tid] = nsecs;
+}
+
+// 5. Driver/Hardware Start (Block Layer issues to Driver)
+tracepoint:block:block_rq_issue
+{
+    if (@start_block[tid]) {
+        $lat = nsecs - @start_block[tid];
+        @latency_4_block_layer_ns = hist($lat);
+        @avg_4_block_layer_ns = avg($lat);
+        delete(@start_block[tid]);
+    }
+    @start_driver[args->dev, args->sector] = nsecs;
+}
+
+// 6. Completion (SSD finishes)
+tracepoint:block:block_rq_complete
+{
+    $s = @start_driver[args->dev, args->sector];
+    if ($s) {
+        $lat = nsecs - $s;
+        @latency_5_driver_ssd_ns = hist($lat);
+        @avg_5_driver_ssd_ns = avg($lat);
+        delete(@start_driver[args->dev, args->sector]);
+    }
+}
+
+// 7. Context Switch (Off-CPU Time)
+tracepoint:sched:sched_switch
+{
+    if (args->prev_comm == "ssd_test_mmap") {
+        @switched_out[args->prev_pid] = nsecs;
+    }
+
+    if (args->next_comm == "ssd_test_mmap") {
+        if (@switched_out[args->next_pid]) {
+            $lat = nsecs - @switched_out[args->next_pid];
+            @latency_6_context_switch_ns = hist($lat);
+            @avg_6_context_switch_ns = avg($lat);
+            delete(@switched_out[args->next_pid]);
+        }
+    }
+}

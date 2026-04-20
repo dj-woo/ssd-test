@@ -1,0 +1,85 @@
+Running fread test with 2 cores and 4 threads (PF Ratio: 0.6)...
+Attaching 6 probes...
+--- Binary Output Start ---
+Starting test on test_file (10240 MB)
+Threads: 4, Cores: 2, Duration: 10s
+Page Fault Ratio (posix_fadvise): 0.60
+Mode: Standard I/O (fread), Mode: r+ (O_RDWR), No Optimization
+
+Results:
+Total Reads: 677794
+IOPS: 67726.57
+Throughput: 264.56 MB/s
+Actual Duration: 10.01s
+--- Binary Output End ---
+
+
+
+
+@avg_2_vfs_layer_ns: 520
+
+@avg_3_filesystem_ns: 102429
+
+@avg_4_block_layer_ns: 7676
+
+@avg_5_driver_ssd_ns: 204836
+
+@avg_6_context_switch_ns: 4553441
+
+
+@latency_2_vfs_layer_ns: 
+[256, 512)        329830 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   |
+[512, 1K)         347421 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+[1K, 2K)             861 |                                                    |
+[2K, 4K)              13 |                                                    |
+[4K, 8K)              33 |                                                    |
+[8K, 16K)            333 |                                                    |
+[16K, 32K)            15 |                                                    |
+
+@latency_3_filesystem_ns: 
+[8K, 16K)              2 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+[16K, 32K)             0 |                                                    |
+[32K, 64K)             0 |                                                    |
+[64K, 128K)            1 |@@@@@@@@@@@@@@@@@@@@@@@@@@                          |
+[128K, 256K)           2 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+
+@latency_4_block_layer_ns: 
+[2K, 4K)               3 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@                     |
+[4K, 8K)               0 |                                                    |
+[8K, 16K)              5 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+
+@latency_5_driver_ssd_ns: 
+[64K, 128K)            1 |@@@@@@@@                                            |
+[128K, 256K)           6 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+[256K, 512K)           2 |@@@@@@@@@@@@@@@@@                                   |
+
+@latency_6_context_switch_ns: 
+[4K, 8K)               7 |                                                    |
+[8K, 16K)             25 |                                                    |
+[16K, 32K)             6 |                                                    |
+[32K, 64K)             0 |                                                    |
+[64K, 128K)            0 |                                                    |
+[128K, 256K)           3 |                                                    |
+[256K, 512K)           0 |                                                    |
+[512K, 1M)             7 |                                                    |
+[1M, 2M)             459 |@@@@                                                |
+[2M, 4M)            5908 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+[4M, 8M)             176 |@                                                   |
+[8M, 16M)              0 |                                                    |
+[16M, 32M)             0 |                                                    |
+[32M, 64M)             0 |                                                    |
+[64M, 128M)            0 |                                                    |
+[128M, 256M)           0 |                                                    |
+[256M, 512M)           0 |                                                    |
+[512M, 1G)             0 |                                                    |
+[1G, 2G)               0 |                                                    |
+[2G, 4G)               0 |                                                    |
+[4G, 8G)               0 |                                                    |
+[8G, 16G)              1 |                                                    |
+
+
+@switched_out[15595]: 2792160153348
+@switched_out[15597]: 2792160179266
+@switched_out[15596]: 2792163047309
+@switched_out[15594]: 2792167115768
+@switched_out[15592]: 2792167413728

@@ -1,0 +1,95 @@
+Running fread test on RAID0 (/mnt/raid0/test_file) with 1 cores and 2 threads (PF Ratio: 1.0)...
+Attaching 7 probes...
+--- Binary Output Start ---
+Starting test on /mnt/raid0/test_file (1048576 MB)
+Threads: 2, Cores: 1, Duration: 10s
+Page Fault Ratio (posix_fadvise): 1.00
+Mode: Standard I/O (fread), Mode: r+ (O_RDWR), No Optimization
+
+Results:
+Total Reads: 2187507
+IOPS: 218744.63
+Throughput: 854.47 MB/s
+Actual Duration: 10.00s
+--- Binary Output End ---
+
+
+@avg_1_user_space_ns: 77340
+
+@avg_2_vfs_layer_ns: 445
+
+@avg_3_filesystem_ns: 45045
+
+@avg_4_block_layer_ns: 6287
+
+@avg_5_driver_ssd_ns: 80886
+
+@avg_6_context_switch_ns: 5877958
+
+@latency_1_user_space_ns: 
+[16K, 32K)             1 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+[32K, 64K)             0 |                                                    |
+[64K, 128K)            1 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+
+@latency_2_vfs_layer_ns: 
+[256, 512)       2167956 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+[512, 1K)          19217 |                                                    |
+[1K, 2K)             149 |                                                    |
+[2K, 4K)             130 |                                                    |
+[4K, 8K)              39 |                                                    |
+[8K, 16K)            835 |                                                    |
+[16K, 32K)           140 |                                                    |
+[32K, 64K)             2 |                                                    |
+
+@latency_3_filesystem_ns: 
+[4K, 8K)              24 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+[8K, 16K)              2 |@@@@                                                |
+[16K, 32K)             1 |@@                                                  |
+[32K, 64K)             0 |                                                    |
+[64K, 128K)            1 |@@                                                  |
+[128K, 256K)           2 |@@@@                                                |
+[256K, 512K)           0 |                                                    |
+[512K, 1M)             1 |@@                                                  |
+
+@latency_4_block_layer_ns: 
+[1K, 2K)               2 |@@@@@@@@@@@@@@                                      |
+[2K, 4K)               5 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@               |
+[4K, 8K)               1 |@@@@@@@                                             |
+[8K, 16K)              7 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+
+@latency_5_driver_ssd_ns: 
+[8K, 16K)              4 |@@@@@@@@@@                                          |
+[16K, 32K)            19 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+[32K, 64K)             3 |@@@@@@@@                                            |
+[64K, 128K)            2 |@@@@@                                               |
+[128K, 256K)           8 |@@@@@@@@@@@@@@@@@@@@@                               |
+[256K, 512K)           3 |@@@@@@@@                                            |
+
+@latency_6_context_switch_ns: 
+[4K, 8K)               6 |                                                    |
+[8K, 16K)             14 |                                                    |
+[16K, 32K)             4 |                                                    |
+[32K, 64K)             6 |                                                    |
+[64K, 128K)           23 |                                                    |
+[128K, 256K)           5 |                                                    |
+[256K, 512K)           1 |                                                    |
+[512K, 1M)             9 |                                                    |
+[1M, 2M)              69 |@                                                   |
+[2M, 4M)            3262 |@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@|
+[4M, 8M)               3 |                                                    |
+[8M, 16M)              0 |                                                    |
+[16M, 32M)             0 |                                                    |
+[32M, 64M)             0 |                                                    |
+[64M, 128M)            0 |                                                    |
+[128M, 256M)           0 |                                                    |
+[256M, 512M)           0 |                                                    |
+[512M, 1G)             0 |                                                    |
+[1G, 2G)               0 |                                                    |
+[2G, 4G)               0 |                                                    |
+[4G, 8G)               0 |                                                    |
+[8G, 16G)              1 |                                                    |
+
+
+@switched_out[45764]: 8693164754317
+@switched_out[45765]: 8693164762879
+@switched_out[45762]: 8693165084811

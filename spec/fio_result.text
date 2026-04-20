@@ -1,0 +1,37 @@
+my_randread: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=1
+...
+fio-3.36
+Starting 8 processes
+
+my_randread: (groupid=0, jobs=8): err= 0: pid=31663: Mon Apr 20 16:17:03 2026
+  read: IOPS=98.9k, BW=386MiB/s (405MB/s)(3865MiB/10001msec)
+    slat (nsec): min=2945, max=71336, avg=3770.31, stdev=1151.98
+    clat (usec): min=11, max=15112, avg=76.71, stdev=57.47
+     lat (usec): min=14, max=15116, avg=80.48, stdev=57.49
+    clat percentiles (usec):
+     |  1.00th=[   58],  5.00th=[   59], 10.00th=[   59], 20.00th=[   61],
+     | 30.00th=[   64], 40.00th=[   82], 50.00th=[   82], 60.00th=[   83],
+     | 70.00th=[   84], 80.00th=[   85], 90.00th=[   86], 95.00th=[   88],
+     | 99.00th=[  114], 99.50th=[  141], 99.90th=[  167], 99.95th=[  215],
+     | 99.99th=[  506]
+   bw (  KiB/s): min=384096, max=399280, per=100.00%, avg=395975.16, stdev=458.92, samples=152
+   iops        : min=96024, max=99820, avg=98993.79, stdev=114.73, samples=152
+  lat (usec)   : 20=0.03%, 50=0.12%, 100=98.42%, 250=1.40%, 500=0.02%
+  lat (usec)   : 750=0.01%
+  lat (msec)   : 2=0.01%, 20=0.01%
+  cpu          : usr=1.61%, sys=11.36%, ctx=989434, majf=0, minf=123
+  IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued rwts: total=989368,0,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=1
+
+Run status group 0 (all jobs):
+   READ: bw=386MiB/s (405MB/s), 386MiB/s-386MiB/s (405MB/s-405MB/s), io=3865MiB (4052MB), run=10001-10001msec
+
+Disk stats (read/write):
+    md0: ios=978236/6098, sectors=7825888/2076784, merge=0/0, ticks=69541/3615, in_queue=73156, util=99.09%, aggrios=247342/1543, aggsectors=1978736/526364, aggrmerge=0/2, aggrticks=17654/1880, aggrin_queue=19535, aggrutil=86.93%
+  nvme3n1: ios=247794/1542, sectors=1982352/526336, merge=0/0, ticks=17534/1308, in_queue=18842, util=85.36%
+  nvme2n1: ios=246979/1542, sectors=1975832/526336, merge=0/0, ticks=17599/1328, in_queue=18926, util=85.53%
+  nvme5n1: ios=247513/1546, sectors=1980104/526448, merge=0/10, ticks=17742/2989, in_queue=20731, util=86.93%
+  nvme4n1: ios=247082/1542, sectors=1976656/526336, merge=0/0, ticks=17744/1898, in_queue=19642, util=86.74%
